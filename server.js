@@ -11,6 +11,7 @@ const Voucher      = require('./models/Voucher');
 const app = express();
 app.set('trust proxy', 1);
 
+
 // ── Security Headers ──────────────────────────────────────────
 app.use(helmet());
 
