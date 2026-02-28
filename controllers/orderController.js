@@ -2,7 +2,7 @@ const Order   = require('../models/Order');
 const User    = require('../models/User');
 const Voucher = require('../models/Voucher');
 const Cart    = require('../models/Cart');
-const { sendOrderConfirmation } = require('../config/email');
+const { sendOrderConfirmation, sendOwnerNotification } = require('../config/email');
 
 // Server-side price catalogue (prevents price tampering from frontend)
 const PRICES = {
@@ -92,9 +92,15 @@ exports.createOrder = async (req, res, next) => {
     await Cart.findOneAndUpdate({ user: req.user._id }, { items: [] });
 
     // ── Send Confirmation Email (non-blocking) ─────────────────
+   // ── Send Confirmation Email to Customer (non-blocking) ────────
     sendOrderConfirmation(req.user.email, order, req.user.name).catch(err =>
-      console.error('[EMAIL] Order confirmation failed:', err.message)
+      console.error('[EMAIL] Customer confirmation failed:', err.message)
     );
+
+    // ── Send Owner Notification Email (non-blocking) ───────────────
+    sendOwnerNotification(order, req.user.name, req.user.email).catch(err =>
+      console.error('[EMAIL] Owner notification failed:', err.message)
+    ); 
 
     res.status(201).json({ success: true, order });
   } catch (err) { next(err); }

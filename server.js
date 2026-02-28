@@ -9,6 +9,7 @@ const errorHandler = require('./middleware/errorHandler');
 const Voucher      = require('./models/Voucher');
 
 const app = express();
+app.set('trust proxy', 1);
 
 // ── Security Headers ──────────────────────────────────────────
 app.use(helmet());
@@ -22,11 +23,8 @@ const allowedOrigins = [
 ].filter(Boolean);
 
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-    callback(new Error('NOT ALLOWED BY CORS'));
-  },
-  credentials: true,
+  origin: '*',
+  credentials: false,
 }));
 
 // ── Rate Limiting ─────────────────────────────────────────────

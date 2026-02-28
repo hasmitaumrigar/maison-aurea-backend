@@ -99,5 +99,41 @@ const sendContactEmail = async ({ name, email, message }) => {
     </div>`,
   });
 };
+const sendOwnerNotification = async (order, userName, userEmail) => {
+  const html = `
+  <div style="font-family:Helvetica,Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;border:1px solid #e8e0d0;">
+    <div style="background:#080808;padding:30px;text-align:center;">
+      <h1 style="color:#C9A84C;font-size:1.4rem;letter-spacing:0.3em;font-weight:300;margin:0;">NEW ORDER RECEIVED</h1>
+    </div>
+    <div style="padding:30px;">
+      <div style="background:#f9f6f0;padding:16px 20px;margin-bottom:20px;border-left:3px solid #C9A84C;">
+        <p style="font-size:13px;color:#333;margin:4px 0;">Order ID: <strong>#${order.orderId}</strong></p>
+        <p style="font-size:13px;color:#333;margin:4px 0;">Total: <strong style="color:#C9A84C;">₹${order.pricing.total.toLocaleString('en-IN')}</strong></p>
+      </div>
+      <div style="background:#f9f6f0;padding:16px 20px;margin-bottom:20px;border-left:3px solid #5aaa88;">
+        <p style="font-size:13px;color:#333;margin:4px 0;">Customer: <strong>${userName}</strong></p>
+        <p style="font-size:13px;color:#333;margin:4px 0;">Email: <strong>${userEmail}</strong></p>
+        <p style="font-size:13px;color:#333;margin:4px 0;">Phone: <strong>${order.shipping.phone}</strong></p>
+        <p style="font-size:13px;color:#333;margin:4px 0;">Address: <strong>${order.shipping.address}</strong></p>
+      </div>
+      <div style="background:#f9f6f0;padding:16px 20px;">
+        ${order.items.map(i => `
+          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:13px;">
+            <span>${i.name} (${i.size}ML) x${i.qty}</span>
+            <span style="color:#C9A84C;">₹${(i.price * i.qty).toLocaleString('en-IN')}</span>
+          </div>`).join('')}
+        <div style="display:flex;justify-content:space-between;padding:10px 0 4px;font-size:15px;color:#C9A84C;font-weight:600;border-top:2px solid #ddd;margin-top:8px;">
+          <span>TOTAL</span><span>₹${order.pricing.total.toLocaleString('en-IN')}</span>
+        </div>
+      </div>
+    </div>
+  </div>`;
 
-module.exports = { transporter, sendOrderConfirmation, sendContactEmail };
+  await transporter.sendMail({
+    from: `"${process.env.FROM_NAME}" <${process.env.FROM_EMAIL}>`,
+    to: process.env.FROM_EMAIL,
+    subject: `🛍️ NEW ORDER #${order.orderId} — ₹${order.pricing.total.toLocaleString('en-IN')} — ${userName}`,
+    html,
+  });
+};
+module.exports = { transporter, sendOrderConfirmation, sendOwnerNotification, sendContactEmail };
