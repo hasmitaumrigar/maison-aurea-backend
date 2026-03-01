@@ -5,7 +5,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const sendOrderConfirmation = async (toEmail, order, userName) => {
   await resend.emails.send({
     from: 'MAISON AURÈA <onboarding@resend.dev>',
-    to: toEmail,
+     to: process.env.FROM_EMAIL,
     subject: `ORDER CONFIRMED #${order.orderId} — MAISON AURÈA`,
     html: `
     <div style="font-family:Helvetica,Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;border:1px solid #e8e0d0;">
