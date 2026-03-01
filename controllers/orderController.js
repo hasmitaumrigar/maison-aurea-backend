@@ -2,7 +2,7 @@ const Order   = require('../models/Order');
 const User    = require('../models/User');
 const Voucher = require('../models/Voucher');
 const Cart    = require('../models/Cart');
-const { sendOrderConfirmation, sendOwnerNotification } = require('../config/email');
+const { sendOrderConfirmation, sendOwnerNotification, sendCancellationEmail } = require('../config/email');
 
 // Server-side price catalogue (prevents price tampering from frontend)
 const PRICES = {
@@ -120,5 +120,23 @@ exports.getOrder = async (req, res, next) => {
     const order = await Order.findOne({ orderId: req.params.id, user: req.user._id });
     if (!order) return res.status(404).json({ success: false, message: 'ORDER NOT FOUND.' });
     res.json({ success: true, order });
+  } catch (err) { next(err); }
+};
+exports.cancelOrder = async (req, res, next) => {
+  try {
+    const order = await Order.findOne({ orderId: req.params.id, user: req.user._id });
+    if (!order) return res.status(404).json({ success: false, message: 'ORDER NOT FOUND.' });
+    if (['SHIPPED', 'DELIVERED'].includes(order.status)) {
+      return res.status(400).json({ success: false, message: `ORDER CANNOT BE CANCELLED — IT HAS ALREADY BEEN ${order.status}.` });
+    }
+    if (order.status === 'CANCELLED') {
+      return res.status(400).json({ success: false, message: 'ORDER IS ALREADY CANCELLED.' });
+    }
+    order.status = 'CANCELLED';
+    await order.save();
+    sendCancellationEmail(req.user.email, order, req.user.name).catch(err =>
+      console.error('[EMAIL] Cancellation email failed:', err.message)
+    );
+    res.json({ success: true, message: 'ORDER CANCELLED SUCCESSFULLY.', order });
   } catch (err) { next(err); }
 };

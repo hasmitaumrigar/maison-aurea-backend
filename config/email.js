@@ -73,4 +73,31 @@ const sendContactEmail = async ({ name, email, message }) => {
   });
 };
 
-module.exports = { sendOrderConfirmation, sendOwnerNotification, sendContactEmail };
+const sendCancellationEmail = async (toEmail, order, userName) => {
+  await resend.emails.send({
+    from: 'MAISON AURÈA <onboarding@resend.dev>',
+    to: process.env.FROM_EMAIL,
+    subject: `ORDER CANCELLED #${order.orderId} — MAISON AURÈA`,
+    html: `
+    <div style="font-family:Helvetica,Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;border:1px solid #e8e0d0;">
+      <div style="background:#080808;padding:40px;text-align:center;">
+        <h1 style="color:#C9A84C;font-size:1.6rem;letter-spacing:0.35em;font-weight:300;margin:0;">MAISON AURÈA</h1>
+      </div>
+      <div style="padding:40px;">
+        <h2 style="font-size:1.1rem;font-weight:300;color:#1a1a1a;">Dear ${userName},</h2>
+        <p style="font-size:13px;color:#666;line-height:1.8;">Your order has been successfully cancelled as requested.</p>
+        <div style="background:#fff5f5;padding:18px 20px;margin:20px 0;border-left:3px solid #e55;">
+          <p style="font-size:13px;color:#333;margin:3px 0;">Order ID: <strong>#${order.orderId}</strong></p>
+          <p style="font-size:13px;color:#333;margin:3px 0;">Status: <strong style="color:#e55;">CANCELLED</strong></p>
+          <p style="font-size:13px;color:#333;margin:3px 0;">Amount: <strong>₹${order.pricing.total.toLocaleString('en-IN')}</strong></p>
+        </div>
+        <p style="font-size:13px;color:#666;line-height:1.8;">If you have any questions please contact us. We hope to serve you again soon.</p>
+      </div>
+      <div style="background:#080808;padding:24px;text-align:center;">
+        <p style="color:rgba(255,255,255,0.3);font-size:10px;margin:0;">© 2026 MAISON AURÈA</p>
+      </div>
+    </div>`,
+  });
+};
+
+module.exports = { sendOrderConfirmation, sendOwnerNotification, sendContactEmail, sendCancellationEmail };
