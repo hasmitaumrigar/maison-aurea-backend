@@ -3,7 +3,7 @@ const User    = require('../models/User');
 const Voucher = require('../models/Voucher');
 const Cart    = require('../models/Cart');
 const { sendOrderConfirmation, sendOwnerNotification, sendCancellationEmail } = require('../config/email');
-
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 // Server-side price catalogue (prevents price tampering from frontend)
 const PRICES = {
   1:{p50:3999,p100:6499},  2:{p50:4499,p100:7499},  3:{p50:3799,p100:6199},
@@ -138,5 +138,45 @@ exports.cancelOrder = async (req, res, next) => {
       console.error('[EMAIL] Cancellation email failed:', err.message)
     );
     res.json({ success: true, message: 'ORDER CANCELLED SUCCESSFULLY.', order });
+  } catch (err) { next(err); }
+};
+exports.createPaymentIntent = async (req, res, next) => {
+  try {
+    const { items, voucherCode } = req.body;
+
+    if (!items?.length) return res.status(400).json({ success: false, message: 'No items.' });
+
+    let subtotal = 0;
+    items.forEach(item => {
+      const catalogue = PRICES[item.productId];
+      if (!catalogue) throw Object.assign(new Error(`Invalid product: ${item.productId}`), { statusCode: 400 });
+      const price = item.size === 100 ? catalogue.p100 : catalogue.p50;
+      const qty = Math.max(1, Math.min(20, parseInt(item.qty) || 1));
+      subtotal += price * qty;
+    });
+
+    const shippingCost = subtotal >= 2999 ? 0 : 199;
+    let discount = 0;
+
+    if (voucherCode) {
+      const voucher = await Voucher.findOne({ code: voucherCode.toUpperCase(), isActive: true });
+      if (voucher && !(voucher.expiresAt && voucher.expiresAt < new Date())) {
+        if (!(voucher.type === 'firstorder' && req.user.ordersPlaced > 0)) {
+          discount = Math.round(subtotal * voucher.discount);
+        }
+      }
+    } else if (req.user.ordersPlaced === 0) {
+      discount = Math.round(subtotal * 0.20);
+    }
+
+    const total = Math.max(0, subtotal + shippingCost - discount);
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: total, // already in pence
+      currency: 'gbp',
+      metadata: { userId: req.user._id.toString() }
+    });
+
+    res.json({ success: true, clientSecret: paymentIntent.client_secret, amount: total });
   } catch (err) { next(err); }
 };
