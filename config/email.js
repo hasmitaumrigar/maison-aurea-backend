@@ -99,7 +99,7 @@ const sendCancellationEmail = async (toEmail, order, userName) => {
     </div>`,
   });
 };
-exports.sendResetEmail = async (to, resetLink, name) => {
+const sendResetEmail = async (to, resetLink, name) => {
   await resend.emails.send({
     from: 'MAISON AURÈA <onboarding@resend.dev>',
     to,
