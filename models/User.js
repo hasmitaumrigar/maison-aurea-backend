@@ -11,7 +11,10 @@ const userSchema = new mongoose.Schema({
   wishlist: [{ type: Number }], // product IDs (1-20)
   role:     { type: String, enum: ['user', 'admin'], default: 'user' },
   lastLogin: Date,
+  resetToken: String,
+resetTokenExpiry: Date,
 }, { timestamps: true });
+
 
 // Hash password before save
 userSchema.pre('save', async function (next) {

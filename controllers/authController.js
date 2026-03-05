@@ -1,7 +1,8 @@
+const crypto = require('crypto');
 const jwt  = require('jsonwebtoken');
 const User = require('../models/User');
 const { body, validationResult } = require('express-validator');
-
+const { sendResetEmail } = require('../config/email');
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '30d' });
 
@@ -79,5 +80,36 @@ exports.changePassword = async (req, res, next) => {
     user.password = newPassword;
     await user.save();
     res.json({ success: true, message: 'PASSWORD UPDATED SUCCESSFULLY.' });
+  } catch (err) { next(err); }
+};
+exports.forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email: email.toLowerCase() });
+    // Always return success to prevent email enumeration
+    if (!user) return res.json({ success: true });
+    const token = crypto.randomBytes(32).toString('hex');
+    user.resetToken = token;
+    user.resetTokenExpiry = Date.now() + 3600000; // 1 hour
+    await user.save();
+    const resetLink = `https://snazzy-halva-d773c3.netlify.app?token=${token}#reset`;
+    await sendResetEmail(user.email, resetLink, user.name);
+    res.json({ success: true });
+  } catch (err) { next(err); }
+};
+
+exports.resetPassword = async (req, res, next) => {
+  try {
+    const { token, password } = req.body;
+    const user = await User.findOne({
+      resetToken: token,
+      resetTokenExpiry: { $gt: Date.now() }
+    });
+    if (!user) return res.status(400).json({ success: false, message: 'RESET LINK IS INVALID OR HAS EXPIRED.' });
+    user.password = password;
+    user.resetToken = undefined;
+    user.resetTokenExpiry = undefined;
+    await user.save();
+    res.json({ success: true });
   } catch (err) { next(err); }
 };

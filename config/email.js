@@ -99,5 +99,20 @@ const sendCancellationEmail = async (toEmail, order, userName) => {
     </div>`,
   });
 };
-
-module.exports = { sendOrderConfirmation, sendOwnerNotification, sendContactEmail, sendCancellationEmail };
+exports.sendResetEmail = async (to, resetLink, name) => {
+  await resend.emails.send({
+    from: 'MAISON AURÈA <onboarding@resend.dev>',
+    to,
+    subject: 'RESET YOUR PASSWORD — MAISON AURÈA',
+    html: `
+      <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;background:#0a0a0a;color:#e8e0d0;padding:40px;">
+        <h2 style="color:#C9A84C;letter-spacing:0.15em;font-size:1.1rem;">MAISON AURÈA</h2>
+        <p style="margin-top:24px;">DEAR ${name.toUpperCase()},</p>
+        <p>WE RECEIVED A REQUEST TO RESET YOUR PASSWORD.</p>
+        <a href="${resetLink}" style="display:inline-block;margin:24px 0;padding:14px 32px;background:#C9A84C;color:#0a0a0a;text-decoration:none;letter-spacing:0.1em;font-size:0.85rem;">RESET MY PASSWORD →</a>
+        <p style="color:#888;font-size:0.8rem;">THIS LINK EXPIRES IN 1 HOUR. IF YOU DID NOT REQUEST THIS, PLEASE IGNORE THIS EMAIL.</p>
+      </div>
+    `
+  });
+};
+module.exports = { sendOrderConfirmation, sendOwnerNotification, sendContactEmail, sendCancellationEmail, sendResetEmail };
