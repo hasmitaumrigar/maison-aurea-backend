@@ -12,7 +12,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@200;300;400;500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@200;300;400;500;600&display=swap"></noscript>
-
 <style>
 /* ── VARIABLES ── */
 
@@ -893,10 +892,13 @@ footer{
   .slider-track{-webkit-touch-callout:none}
 }
 #scroll-bar{position:fixed;top:0;left:0;height:2px;width:0%;background:linear-gradient(90deg,var(--gold),#f0d98a,var(--gold));z-index:99998;transition:width 0.1s linear;box-shadow:0 0 8px rgba(201,168,76,0.6)}
+#cursor-glow{pointer-events:none;position:fixed;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,0.07) 0%,transparent 70%);transform:translate(-50%,-50%);z-index:99990;transition:opacity 0.3s;will-change:transform}
 </style>
 </head>
 <body>
 <div id="scroll-bar"></div>
+
+<div id="cursor-glow"></div>
 <!-- LOADER -->
 <div id="loader">
   <div class="ld-name">MAISON AURÈA</div>
@@ -2406,6 +2408,20 @@ load();
     var h=document.documentElement.scrollHeight-document.documentElement.clientHeight;
     bar.style.width=(h>0?(s/h*100):0)+'%';
   },{passive:true});
+})();
+(function(){
+  var g=document.getElementById('cursor-glow');
+  var mx=window.innerWidth/2,my=window.innerHeight/2;
+  var cx=mx,cy=my;
+  window.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY;},{passive:true});
+  function animGlow(){
+    cx+=(mx-cx)*0.08;cy+=(my-cy)*0.08;
+    g.style.left=cx+'px';g.style.top=cy+'px';
+    requestAnimationFrame(animGlow);
+  }
+  animGlow();
+  document.body.addEventListener('mouseleave',function(){g.style.opacity='0';});
+  document.body.addEventListener('mouseenter',function(){g.style.opacity='1';});
 })();
 </script>
 </body>
