@@ -2464,6 +2464,24 @@ load();
     if(el){el.classList.remove('page-fade');void el.offsetWidth;el.classList.add('page-fade');}
   };
 })();
+(function(){
+  function initMag(){
+    document.querySelectorAll('.btn-gold,.btn-wout').forEach(function(btn){
+      if(btn.dataset.mag)return;
+      btn.dataset.mag='1';
+      btn.addEventListener('mousemove',function(e){
+        var r=btn.getBoundingClientRect();
+        var dx=e.clientX-(r.left+r.width/2);
+        var dy=e.clientY-(r.top+r.height/2);
+        btn.style.transform='translate('+(dx*0.18)+'px,'+(dy*0.22)+'px)';
+      });
+      btn.addEventListener('mouseleave',function(){btn.style.transform='translate(0,0)';});
+    });
+  }
+  initMag();
+  var origGo=window.go;
+  window.go=function(pg){origGo(pg);setTimeout(initMag,100);};
+})();
 </script>
 </body>
 </html>
