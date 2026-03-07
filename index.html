@@ -894,6 +894,10 @@ footer{
 #scroll-bar{position:fixed;top:0;left:0;height:2px;width:0%;background:linear-gradient(90deg,var(--gold),#f0d98a,var(--gold));z-index:99998;transition:width 0.1s linear;box-shadow:0 0 8px rgba(201,168,76,0.6)}
 #cursor-glow{pointer-events:none;position:fixed;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,0.15) 0%,transparent 70%);transform:translate(-50%,-50%);z-index:99990;opacity:1;transition:opacity 0.3s;will-change:transform}
 #particles-canvas{position:absolute;inset:0;pointer-events:none;z-index:1}
+.pcard::after{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(201,168,76,0.15) 50%,transparent 60%);transform:translateX(-100%);transition:transform 0s;pointer-events:none;z-index:2}
+.pcard:hover::after{transform:translateX(100%);transition:transform 0.5s ease}
+.page-fade{animation:pageFadeIn 0.35s ease forwards}
+@keyframes pageFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
@@ -2451,6 +2455,14 @@ load();
   }
   drawParticles();
 })();
+})();
+(function(){
+  var origGo=window.go;
+  window.go=function(pg){
+    origGo(pg);
+    var el=document.getElementById('page-'+pg);
+    if(el){el.classList.remove('page-fade');void el.offsetWidth;el.classList.add('page-fade');}
+  };
 })();
 </script>
 </body>
