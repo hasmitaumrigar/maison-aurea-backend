@@ -2399,6 +2399,14 @@ function fmt(n){
 
 /* ═══ LOAD STATE ON STARTUP ═══ */
 load();
+(function(){
+  var bar=document.getElementById('scroll-bar');
+  window.addEventListener('scroll',function(){
+    var s=document.documentElement.scrollTop||document.body.scrollTop;
+    var h=document.documentElement.scrollHeight-document.documentElement.clientHeight;
+    bar.style.width=(h>0?(s/h*100):0)+'%';
+  },{passive:true});
+})();
 </script>
 </body>
 </html>
