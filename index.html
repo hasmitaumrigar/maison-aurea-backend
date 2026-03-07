@@ -1242,6 +1242,13 @@ footer{
             <button type="button" class="pw-eye" onclick="tglPw('resetPw',this)" aria-label="Show password"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:15px;height:15px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
           </div>
         </div>
+        <div class="fg" style="margin-top:12px">
+          <label class="flbl">CONFIRM PASSWORD</label>
+          <div class="pw-wrap">
+            <input id="resetPwConfirm" class="finp" type="password" required placeholder="RE-ENTER YOUR PASSWORD" autocomplete="new-password" style="padding-right:40px">
+            <button type="button" class="pw-eye" onclick="tglPw('resetPwConfirm',this)" aria-label="Show password"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:15px;height:15px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          </div>
+        </div>
         <button type="submit" class="btn btn-gold btn-full" style="margin-top:4px">RESET PASSWORD →</button>
       </form>
     </div>
@@ -2161,10 +2168,15 @@ function renderOrders(){
 async function doReset(e){
   e.preventDefault();
   const pw=(document.getElementById('resetPw').value||'').trim();
+  const pw2=(document.getElementById('resetPwConfirm').value||'').trim();
   const err=document.getElementById('resetErr');
   err.textContent='';
   if(pw.length<8||!/[!@#$%^&*]/.test(pw)){
     err.textContent='PASSWORD MUST BE AT LEAST 8 CHARACTERS AND INCLUDE ONE SPECIAL CHARACTER.';
+    return;
+  }
+  if(pw!==pw2){
+    err.textContent='PASSWORDS DO NOT MATCH.';
     return;
   }
   const token=new URLSearchParams(window.location.search).get('token');
@@ -2177,9 +2189,10 @@ async function doReset(e){
     });
     const d=await r.json();
     if(d.success){
-     toast('PASSWORD RESET SUCCESSFULLY. PLEASE SIGN IN.','ok');
+      toast('PASSWORD RESET SUCCESSFULLY. PLEASE SIGN IN.','ok');
       history.replaceState(null,'',window.location.pathname);
       go('login');
+    }else{
       err.textContent=d.message||'RESET FAILED. LINK MAY HAVE EXPIRED.';
     }
   }catch(err2){
