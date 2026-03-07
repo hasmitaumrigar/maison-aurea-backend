@@ -92,7 +92,9 @@ exports.forgotPassword = async (req, res, next) => {
     user.resetToken = token;
     user.resetTokenExpiry = Date.now() + 3600000; // 1 hour
     await user.save();
-    const resetLink = `https://snazzy-halva-d773c3.netlify.app?token=${token}#reset`;
+    console.log('FRONTEND_URL:', process.env.FRONTEND_URL);
+console.log('resetLink:', `${process.env.FRONTEND_URL}?token=${token}`);
+const resetLink = `${process.env.FRONTEND_URL}?token=${token}`;
     await sendResetEmail(user.email, resetLink, user.name);
     res.json({ success: true });
   } catch (err) { next(err); }
