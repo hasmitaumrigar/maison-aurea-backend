@@ -892,7 +892,8 @@ footer{
   .slider-track{-webkit-touch-callout:none}
 }
 #scroll-bar{position:fixed;top:0;left:0;height:2px;width:0%;background:linear-gradient(90deg,var(--gold),#f0d98a,var(--gold));z-index:99998;transition:width 0.1s linear;box-shadow:0 0 8px rgba(201,168,76,0.6)}
-#cursor-glow{pointer-events:none;position:fixed;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,0.07) 0%,transparent 70%);transform:translate(-50%,-50%);z-index:99990;opacity:1;transition:opacity 0.3s;will-change:transform}
+#cursor-glow{pointer-events:none;position:fixed;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,0.15) 0%,transparent 70%);transform:translate(-50%,-50%);z-index:99990;opacity:1;transition:opacity 0.3s;will-change:transform}
+#particles-canvas{position:absolute;inset:0;pointer-events:none;z-index:1}
 </style>
 </head>
 <body>
@@ -1033,6 +1034,7 @@ footer{
 <div id="page-home" class="page active">
   <section class="hero">
     <div class="hero-l">
+<canvas id="particles-canvas"></canvas>
       <p class="h-eye">✦ THE ART OF LUXURY FRAGRANCE ✦</p>
       <h1 class="h-title">WHERE SCENT<br>BECOMES <em>ART</em></h1>
       <p class="h-desc">DISCOVER FRAGRANCES CRAFTED FROM THE WORLD'S RAREST BOTANICALS. EACH BOTTLE A MASTERPIECE. EACH SCENT AN ETERNAL STORY.</p>
@@ -2422,6 +2424,33 @@ load();
   animGlow();
   document.body.addEventListener('mouseleave',function(){g.style.opacity='0';});
   document.body.addEventListener('mouseenter',function(){g.style.opacity='1';});
+  (function(){
+  var canvas=document.getElementById('particles-canvas');
+  if(!canvas)return;
+  var ctx=canvas.getContext('2d');
+  var particles=[];
+  function resize(){canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;}
+  resize();
+  window.addEventListener('resize',resize,{passive:true});
+  for(var i=0;i<55;i++){
+    particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.5+0.3,dx:(Math.random()-0.5)*0.3,dy:-(Math.random()*0.4+0.1),o:Math.random()*0.6+0.2,pulse:Math.random()*Math.PI*2});
+  }
+  function drawParticles(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(function(p){
+      p.pulse+=0.02;
+      var opacity=p.o*(0.7+0.3*Math.sin(p.pulse));
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(201,168,76,'+opacity+')';ctx.fill();
+      p.x+=p.dx;p.y+=p.dy;
+      if(p.y<-5)p.y=canvas.height+5;
+      if(p.x<-5)p.x=canvas.width+5;
+      if(p.x>canvas.width+5)p.x=-5;
+    });
+    requestAnimationFrame(drawParticles);
+  }
+  drawParticles();
+})();
 })();
 </script>
 </body>
