@@ -176,7 +176,7 @@ img{max-width:100%;display:block}
 .ham.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
 /* Mobile nav */
 .mnav{
-  position:fixed;inset:0;z-index:1000;background:var(--bg);
+  position:fixed;inset:0;z-index:2000;background:var(--bg);
   transform:translateX(100%);
   transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -190,7 +190,7 @@ img{max-width:100%;display:block}
   font-size:1.3rem;color:var(--text);cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   -webkit-tap-highlight-color:transparent;
-  z-index:1001;touch-action:manipulation;
+  z-index:2001;touch-action:manipulation;
 }
 .mnav a,.mnav button.mnav-btn{
   font-family:'Cormorant Garamond',Georgia,serif;
