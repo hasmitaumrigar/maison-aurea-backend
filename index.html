@@ -923,30 +923,42 @@ footer{
     <button class="btn btn-gold" style="margin:0 auto;display:flex" onclick="closePop()">CLOSE</button>
   </div>
 </div>
-<!-- CANCELLATION MODAL -->
+<!-- ORDER ASSISTANCE MODAL -->
 <div class="suc-ov" id="cancelOv" style="z-index:9000">
-  <div class="suc-box" style="max-width:480px;text-align:left;">
+  <div class="suc-box" style="max-width:500px;text-align:left;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border);">
-      <h3 style="font-size:0.8rem;letter-spacing:0.2em;color:var(--text);margin:0;">CANCEL ORDER</h3>
+      <div>
+        <h3 style="font-size:0.75rem;letter-spacing:0.25em;color:var(--text);margin:0 0 4px;">ORDER ASSISTANCE</h3>
+        <p style="font-size:0.58rem;color:var(--muted);letter-spacing:0.08em;margin:0;">ORDER <span id="cancelOrdId" style="color:var(--gold);"></span></p>
+      </div>
       <button onclick="closeCancelModal()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">✕</button>
     </div>
-    <p style="font-size:0.62rem;color:var(--muted);letter-spacing:0.08em;margin-bottom:20px;">ORDER <span id="cancelOrdId" style="color:var(--gold);"></span></p>
-    <p style="font-size:0.65rem;letter-spacing:0.12em;color:var(--text);margin-bottom:14px;">REASON FOR CANCELLATION</p>
-    <div id="cancelReasons" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
-      <label class="cancel-reason"><input type="radio" name="cancelReason" value="No longer interested"> NO LONGER INTERESTED</label>
-      <label class="cancel-reason"><input type="radio" name="cancelReason" value="Ordered by mistake"> ORDERED BY MISTAKE</label>
-      <label class="cancel-reason"><input type="radio" name="cancelReason" value="Found a better price"> FOUND A BETTER PRICE ELSEWHERE</label>
-      <label class="cancel-reason"><input type="radio" name="cancelReason" value="Delivery time too long"> DELIVERY TIME TOO LONG</label>
-      <label class="cancel-reason"><input type="radio" name="cancelReason" value="Changed my mind"> CHANGED MY MIND</label>
-      <label class="cancel-reason"><input type="radio" name="cancelReason" value="Other"> OTHER</label>
+    <!-- REQUEST TYPE -->
+    <p style="font-size:0.62rem;letter-spacing:0.15em;color:var(--text);margin-bottom:14px;">HOW CAN WE ASSIST YOU?</p>
+    <div id="assistTypeWrap" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+      <label class="cancel-reason"><input type="radio" name="assistType" value="cancel"> CANCEL MY ORDER</label>
+      <label class="cancel-reason"><input type="radio" name="assistType" value="return"> RETURN & REFUND REQUEST</label>
+      <label class="cancel-reason"><input type="radio" name="assistType" value="other"> OTHER ISSUE</label>
+    </div>
+    <!-- REASON -->
+    <div id="cancelReasonWrap" style="display:none;">
+      <p style="font-size:0.62rem;letter-spacing:0.12em;color:var(--text);margin-bottom:12px;">REASON</p>
+      <div id="cancelReasons" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+        <label class="cancel-reason"><input type="radio" name="cancelReason" value="No longer interested"> NO LONGER INTERESTED</label>
+        <label class="cancel-reason"><input type="radio" name="cancelReason" value="Ordered by mistake"> ORDERED BY MISTAKE</label>
+        <label class="cancel-reason"><input type="radio" name="cancelReason" value="Found a better price"> FOUND A BETTER PRICE ELSEWHERE</label>
+        <label class="cancel-reason"><input type="radio" name="cancelReason" value="Delivery time too long"> DELIVERY TIME TOO LONG</label>
+        <label class="cancel-reason"><input type="radio" name="cancelReason" value="Changed my mind"> CHANGED MY MIND</label>
+        <label class="cancel-reason"><input type="radio" name="cancelReason" value="Other"> OTHER</label>
+      </div>
     </div>
     <div id="cancelOtherWrap" style="display:none;margin-bottom:20px;">
-      <textarea id="cancelOtherText" class="finp" placeholder="PLEASE TELL US MORE..." style="width:100%;height:80px;resize:none;font-size:0.6rem;letter-spacing:0.08em;padding:12px;box-sizing:border-box;"></textarea>
+      <textarea id="cancelOtherText" class="finp" placeholder="PLEASE DESCRIBE YOUR REQUEST..." style="width:100%;height:80px;resize:none;font-size:0.6rem;letter-spacing:0.08em;padding:12px;box-sizing:border-box;"></textarea>
     </div>
     <p id="cancelErr" style="font-size:0.6rem;color:#e55;letter-spacing:0.1em;margin-bottom:12px;display:none;"></p>
     <div style="display:flex;gap:12px;">
-      <button onclick="closeCancelModal()" style="flex:1;padding:14px;background:transparent;border:1px solid var(--border);color:var(--muted);font-size:0.6rem;letter-spacing:0.12em;cursor:pointer;">KEEP ORDER</button>
-      <button onclick="confirmCancel()" style="flex:1;padding:14px;background:rgba(229,85,85,0.1);border:1px solid rgba(229,85,85,0.4);color:#e55;font-size:0.6rem;letter-spacing:0.12em;cursor:pointer;">CONFIRM CANCELLATION</button>
+      <button onclick="closeCancelModal()" style="flex:1;padding:14px;background:transparent;border:1px solid var(--border);color:var(--muted);font-size:0.6rem;letter-spacing:0.12em;cursor:pointer;">GO BACK</button>
+      <button onclick="confirmCancel()" style="flex:1;padding:14px;background:rgba(201,168,76,0.08);border:1px solid var(--gold);color:var(--gold);font-size:0.6rem;letter-spacing:0.12em;cursor:pointer;">SUBMIT REQUEST</button>
     </div>
   </div>
 </div>
@@ -1725,6 +1737,7 @@ function safeNum(v){
 
 /* ═══ CART ═══ */
 function addCart(id,sz){
+  if(!S.user){toast('PLEASE SIGN IN TO ADD TO CART','err');go('login');return;}
   const p=P.find(function(x){return x.id===id;});
   if(!p) return;
   const sz_num=Number(sz)||50;
@@ -1996,6 +2009,7 @@ function afterOrder(){
 /* ═══ WISHLIST ═══ */
 function tglWL(e,id){
   if(e) e.stopPropagation();
+  if(!S.user){toast('PLEASE SIGN IN TO USE WISHLIST','err');go('login');return;}
   id=Number(id);
   if(S.wl.includes(id)){
     S.wl=S.wl.filter(function(x){return x!==id;});
@@ -2063,6 +2077,17 @@ function cancelOrder(ordId){
       document.getElementById('cancelOtherWrap').style.display=r.value==='Other'?'block':'none';
     });
   });
+  document.querySelectorAll('input[name="assistType"]').forEach(function(r){r.checked=false;});
+  document.getElementById('cancelReasonWrap').style.display='none';
+  document.getElementById('cancelOtherWrap').style.display='none';
+  document.querySelectorAll('input[name="assistType"]').forEach(function(r){
+    r.addEventListener('change',function(){
+      const isCancel=r.value==='cancel';
+      const isOther=r.value==='other';
+      document.getElementById('cancelReasonWrap').style.display=isCancel?'block':'none';
+      document.getElementById('cancelOtherWrap').style.display=isOther?'block':'none';
+    });
+  });
   document.getElementById('cancelOv').classList.add('open');
   document.body.style.overflow='hidden';
 }
@@ -2072,29 +2097,40 @@ function closeCancelModal(){
   _cancelOrdId=null;
 }
 function confirmCancel(){
-  const selected=document.querySelector('input[name="cancelReason"]:checked');
+  const typeEl=document.querySelector('input[name="assistType"]:checked');
   const errEl=document.getElementById('cancelErr');
-  if(!selected){
-    errEl.textContent='PLEASE SELECT A REASON FOR CANCELLATION.';
+  if(!typeEl){
+    errEl.textContent='PLEASE SELECT AN OPTION.';
     errEl.style.display='block';
     return;
   }
-  let reason=selected.value;
-  if(reason==='Other'){
-    const other=(document.getElementById('cancelOtherText').value||'').trim();
-    if(!other){
-      errEl.textContent='PLEASE DESCRIBE YOUR REASON.';
+  const assistType=typeEl.value;
+  let reason='';
+  if(assistType==='cancel'){
+    const reasonEl=document.querySelector('input[name="cancelReason"]:checked');
+    if(!reasonEl){
+      errEl.textContent='PLEASE SELECT A REASON.';
       errEl.style.display='block';
       return;
     }
-    reason='Other: '+other;
+    reason=reasonEl.value;
+    if(reason==='Other'){
+      const other=(document.getElementById('cancelOtherText').value||'').trim();
+      if(!other){errEl.textContent='PLEASE DESCRIBE YOUR REASON.';errEl.style.display='block';return;}
+      reason='Other: '+other;
+    }
+  } else {
+    reason=(document.getElementById('cancelOtherText').value||'').trim();
+    if(!reason){errEl.textContent='PLEASE DESCRIBE YOUR REQUEST.';errEl.style.display='block';return;}
   }
   errEl.style.display='none';
   const list=S.orders[S.user]||[];
   const ord=list.find(function(o){return o.id===_cancelOrdId;});
   if(!ord){closeCancelModal();return;}
-  ord.status='CANCELLED';
-  ord.cancelReason=reason;
+  if(assistType==='cancel'&&ord.status==='PROCESSING'){
+    ord.status='CANCELLED';
+    ord.cancelReason=reason;
+  }
   save();
   try{
     const token=localStorage.getItem('ma_token');
@@ -2125,7 +2161,7 @@ function renderOrders(){
   const steps=['CONFIRMED','PROCESSING','SHIPPED','DELIVERED'];
   el.innerHTML=list.map(function(o){
     const isCancelled=o.status==='CANCELLED';
-    const canCancel=!isCancelled&&o.status!=='SHIPPED'&&o.status!=='DELIVERED';
+    const canCancel=o.status==='PROCESSING';
     const stepIdx=getStatusStep(o.status);
     const statusColor=getStatusColor(o.status);
     const trackerHTML=isCancelled
@@ -2149,10 +2185,10 @@ function renderOrders(){
       +'</div>'
       +trackerHTML
       +'<div class="oc-items">'+o.items.map(function(i){return i.name+' ('+(i.sz||i.size)+'ML) ×'+i.qty;}).join(' · ')+'</div>'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;">'
+     +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;">'
       +'<div class="oc-total">₹'+fmt(safeNum(o.tot||o.total))+'</div>'
-      +(canCancel?'<button onclick="cancelOrder(\''+o.id+'\')" style="font-size:0.58rem;letter-spacing:0.12em;padding:7px 14px;background:transparent;border:1px solid rgba(229,85,85,0.4);color:#e55;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background=\'rgba(229,85,85,0.08)\'" onmouseout="this.style.background=\'transparent\'">✕ CANCEL ORDER</button>':'')
       +'</div>'
+      +(isCancelled?'':'<div style="text-align:right;margin-top:10px;"><button onclick="cancelOrder(\''+o.id+'\')" style="background:none;border:none;color:var(--muted);font-size:0.55rem;letter-spacing:0.1em;cursor:pointer;text-decoration:underline;text-underline-offset:3px;">Need assistance with this order?</button></div>')
       +'</div>';
   }).join('');
 }async function doForgot(e){
