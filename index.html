@@ -1556,7 +1556,15 @@ function closeMnav(){
   document.body.style.overflow='';
   document.documentElement.style.overflow='';
 }
-document.getElementById('mnavClose').addEventListener('touchstart', function(e){
+document.getElementById('mnavClose').addEventListener('click', function(e){
+  e.stopPropagation();
+  closeMnav();
+});
+document.getElementById('mnavClose').addEventListener('touchend', function(e){
+  e.preventDefault();
+  e.stopPropagation();
+  closeMnav();
+});
   e.preventDefault();
   closeMnav();
 }, {passive:false});
