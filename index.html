@@ -1565,12 +1565,6 @@ document.getElementById('mnavClose').addEventListener('touchend', function(e){
   e.stopPropagation();
   closeMnav();
 });
-  e.preventDefault();
-  closeMnav();
-}, {passive:false});
-document.getElementById('mnavClose').addEventListener('click', function(){
-  closeMnav();
-});
 function mnavAuthLbl(){
   const el=document.getElementById('mnavAuth');
   if(el) el.textContent=S.user?'MY ACCOUNT':'SIGN IN';
