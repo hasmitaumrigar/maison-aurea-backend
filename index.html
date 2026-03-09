@@ -2328,6 +2328,9 @@ async function doSignup(e){
 function doLogout(){
   S.user=null;
   S.voucher=null;
+  S.cart=[];
+  S.wl=[];
+  localStorage.removeItem('ma_token');
   save();navProfile();badges();mnavAuthLbl();
   toast('SIGNED OUT SUCCESSFULLY');
   closePdrop();
