@@ -1212,8 +1212,8 @@ footer{
 <div id="page-login" class="page">
   <div class="auth-pg">
     <div class="auth-card rev">
-      <h2 class="auth-title">WELCOME BACK</h2>
-      <p class="auth-sub">SIGN IN TO YOUR MAISON AURÈA ACCOUNT</p>
+     <h2 class="auth-title" id="loginTitle">SIGN IN</h2>
+<p class="auth-sub" id="loginSub">ACCESS YOUR MAISON AURÈA ACCOUNT</p>
       <div class="auth-err" id="loginErr"></div>
       <form onsubmit="doLogin(event)" autocomplete="on" novalidate>
         <div class="fg"><label class="flbl">EMAIL ADDRESS</label><input id="loginEmail" class="finp" type="email" required placeholder="your@email.com" autocomplete="email" inputmode="email"></div>
@@ -1599,12 +1599,20 @@ function navProfile(){
   if(S.user&&S.users[S.user]){
     nm.textContent=S.users[S.user].name.toUpperCase();
     it.innerHTML='<button class="pdrop-item" onclick="go(\'orders\');closePdrop()">ORDER HISTORY</button><button class="pdrop-item" onclick="go(\'wishlist\');closePdrop()">WISHLIST</button><button class="pdrop-item red" onclick="doLogout()">SIGN OUT</button>';
+  }if(S.user&&S.users[S.user]){
+    nm.textContent=S.users[S.user].name.toUpperCase();
+    it.innerHTML='<button class="pdrop-item" onclick="go(\'orders\');closePdrop()">ORDER HISTORY</button><button class="pdrop-item" onclick="go(\'wishlist\');closePdrop()">WISHLIST</button><button class="pdrop-item red" onclick="doLogout()">SIGN OUT</button>';
+    document.getElementById('loginTitle').textContent='WELCOME BACK';
+    document.getElementById('loginSub').textContent='SIGN IN TO YOUR MAISON AURÈA ACCOUNT';
   }else{
     nm.textContent='';
     it.innerHTML='<button class="pdrop-item" onclick="go(\'login\');closePdrop()">SIGN IN</button><button class="pdrop-item" onclick="go(\'signup\');closePdrop()">CREATE ACCOUNT</button>';
+    document.getElementById('loginTitle').textContent='SIGN IN';
+    document.getElementById('loginSub').textContent='ACCESS YOUR MAISON AURÈA ACCOUNT';
   }
 }
-
+document.getElementById('loginTitle').textContent='WELCOME BACK';
+document.getElementById('loginSub').textContent='SIGN IN TO YOUR MAISON AURÈA ACCOUNT';
 /* ═══ TICKER ═══ */
 function renderTicker(){
   const el=document.getElementById('tickerEl');
