@@ -933,23 +933,20 @@ footer{
       </div>
       <button onclick="closeCancelModal()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">✕</button>
     </div>
-    <!-- REQUEST TYPE -->
     <p style="font-size:0.62rem;letter-spacing:0.15em;color:var(--text);margin-bottom:14px;">HOW CAN WE ASSIST YOU?</p>
     <div id="assistTypeWrap" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
       <label class="cancel-reason"><input type="radio" name="assistType" value="cancel"> CANCEL MY ORDER</label>
-      <label class="cancel-reason"><input type="radio" name="assistType" value="return"> RETURN & REFUND REQUEST</label>
+      <label class="cancel-reason"><input type="radio" name="assistType" value="return"> RETURN &amp; REFUND REQUEST</label>
       <label class="cancel-reason"><input type="radio" name="assistType" value="other"> OTHER ISSUE</label>
     </div>
-    <!-- REASON -->
     <div id="cancelReasonWrap" style="display:none;">
-      <p style="font-size:0.62rem;letter-spacing:0.12em;color:var(--text);margin-bottom:12px;">REASON</p>
+      <p style="font-size:0.62rem;letter-spacing:0.12em;color:var(--text);margin-bottom:12px;">REASON FOR CANCELLATION</p>
       <div id="cancelReasons" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
         <label class="cancel-reason"><input type="radio" name="cancelReason" value="No longer interested"> NO LONGER INTERESTED</label>
         <label class="cancel-reason"><input type="radio" name="cancelReason" value="Ordered by mistake"> ORDERED BY MISTAKE</label>
         <label class="cancel-reason"><input type="radio" name="cancelReason" value="Found a better price"> FOUND A BETTER PRICE ELSEWHERE</label>
         <label class="cancel-reason"><input type="radio" name="cancelReason" value="Delivery time too long"> DELIVERY TIME TOO LONG</label>
         <label class="cancel-reason"><input type="radio" name="cancelReason" value="Changed my mind"> CHANGED MY MIND</label>
-        <label class="cancel-reason"><input type="radio" name="cancelReason" value="Other"> OTHER</label>
       </div>
     </div>
     <div id="cancelOtherWrap" style="display:none;margin-bottom:20px;">
@@ -958,7 +955,7 @@ footer{
     <p id="cancelErr" style="font-size:0.6rem;color:#e55;letter-spacing:0.1em;margin-bottom:12px;display:none;"></p>
     <div style="display:flex;gap:12px;">
       <button onclick="closeCancelModal()" style="flex:1;padding:14px;background:transparent;border:1px solid var(--border);color:var(--muted);font-size:0.6rem;letter-spacing:0.12em;cursor:pointer;">GO BACK</button>
-      <button onclick="confirmCancel()" style="flex:1;padding:14px;background:rgba(201,168,76,0.08);border:1px solid var(--gold);color:var(--gold);font-size:0.6rem;letter-spacing:0.12em;cursor:pointer;">SUBMIT REQUEST</button>
+      <button onclick="confirmCancel()" style="flex:1;padding:14px;background:rgba(201,168,76,0.08);border:1px solid var(--gold);color:var(--gold);font-size:0.6rem;letter-spacing:0.12em;cursor:pointer;">SUBMIT REQUEST →</button>
     </div>
   </div>
 </div>
@@ -2062,30 +2059,19 @@ function cancelOrder(ordId){
   const list=S.orders[S.user]||[];
   const ord=list.find(function(o){return o.id===ordId;});
   if(!ord){toast('ORDER NOT FOUND.','err');return;}
-  if(ord.status==='SHIPPED'||ord.status==='DELIVERED'){
-    toast('THIS ORDER CANNOT BE CANCELLED — IT HAS ALREADY BEEN '+ord.status+'.','err');return;
-  }
   if(ord.status==='CANCELLED'){toast('THIS ORDER IS ALREADY CANCELLED.','err');return;}
   _cancelOrdId=ordId;
   document.getElementById('cancelOrdId').textContent='#'+ordId;
+  document.querySelectorAll('input[name="assistType"]').forEach(function(r){r.checked=false;});
   document.querySelectorAll('input[name="cancelReason"]').forEach(function(r){r.checked=false;});
+  document.getElementById('cancelReasonWrap').style.display='none';
   document.getElementById('cancelOtherWrap').style.display='none';
   document.getElementById('cancelOtherText').value='';
   document.getElementById('cancelErr').style.display='none';
-  document.querySelectorAll('input[name="cancelReason"]').forEach(function(r){
-    r.addEventListener('change',function(){
-      document.getElementById('cancelOtherWrap').style.display=r.value==='Other'?'block':'none';
-    });
-  });
-  document.querySelectorAll('input[name="assistType"]').forEach(function(r){r.checked=false;});
-  document.getElementById('cancelReasonWrap').style.display='none';
-  document.getElementById('cancelOtherWrap').style.display='none';
   document.querySelectorAll('input[name="assistType"]').forEach(function(r){
     r.addEventListener('change',function(){
-      const isCancel=r.value==='cancel';
-      const isOther=r.value==='other';
-      document.getElementById('cancelReasonWrap').style.display=isCancel?'block':'none';
-      document.getElementById('cancelOtherWrap').style.display=isOther?'block':'none';
+      document.getElementById('cancelReasonWrap').style.display=r.value==='cancel'?'block':'none';
+      document.getElementById('cancelOtherWrap').style.display=(r.value==='return'||r.value==='other')?'block':'none';
     });
   });
   document.getElementById('cancelOv').classList.add('open');
@@ -2096,9 +2082,10 @@ function closeCancelModal(){
   document.body.style.overflow='';
   _cancelOrdId=null;
 }
-function confirmCancel(){
+async function confirmCancel(){
   const typeEl=document.querySelector('input[name="assistType"]:checked');
   const errEl=document.getElementById('cancelErr');
+  errEl.style.display='none';
   if(!typeEl){
     errEl.textContent='PLEASE SELECT AN OPTION.';
     errEl.style.display='block';
@@ -2114,38 +2101,58 @@ function confirmCancel(){
       return;
     }
     reason=reasonEl.value;
-    if(reason==='Other'){
-      const other=(document.getElementById('cancelOtherText').value||'').trim();
-      if(!other){errEl.textContent='PLEASE DESCRIBE YOUR REASON.';errEl.style.display='block';return;}
-      reason='Other: '+other;
-    }
-  } else {
+  }else{
     reason=(document.getElementById('cancelOtherText').value||'').trim();
-    if(!reason){errEl.textContent='PLEASE DESCRIBE YOUR REQUEST.';errEl.style.display='block';return;}
+    if(!reason){
+      errEl.textContent='PLEASE DESCRIBE YOUR REQUEST.';
+      errEl.style.display='block';
+      return;
+    }
   }
-  errEl.style.display='none';
   const list=S.orders[S.user]||[];
   const ord=list.find(function(o){return o.id===_cancelOrdId;});
   if(!ord){closeCancelModal();return;}
-  if(assistType==='cancel'&&ord.status==='PROCESSING'){
-    ord.status='CANCELLED';
-    ord.cancelReason=reason;
-  }
-  save();
-  try{
-    const token=localStorage.getItem('ma_token');
-    if(token&&typeof API!=='undefined'){
-      fetch(API+'/orders/'+_cancelOrdId+'/cancel',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-        body:JSON.stringify({reason:reason}),
-      }).catch(function(e){console.warn('Cancel API:',e);});
+  const token=localStorage.getItem('ma_token');
+  if(assistType==='cancel'){
+    if(ord.status==='PROCESSING'){
+      ord.status='CANCELLED';
+      ord.cancelReason=reason;
+      save();
+      try{
+        if(token){
+          await fetch(API+'/orders/'+_cancelOrdId+'/cancel',{
+            method:'POST',
+            headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+            body:JSON.stringify({reason:reason}),
+          });
+        }
+      }catch(e){console.warn('Cancel API:',e);}
+      closeCancelModal();
+      toast('YOUR ORDER HAS BEEN CANCELLED.','ok');
+      renderOrders();
+    }else{
+      closeCancelModal();
+      showPop('📦','CANNOT CANCEL ORDER','YOUR ORDER HAS ALREADY BEEN '+ord.status+'. PLEASE CONTACT OUR SUPPORT TEAM FOR FURTHER ASSISTANCE.');
     }
-  }catch(e){console.warn('Cancel error:',e);}
-  closeCancelModal();
-  toast('ORDER #'+_cancelOrdId+' HAS BEEN CANCELLED.','ok');
+  }else{
+    try{
+      if(token){
+        await fetch(API+'/contact',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+          body:JSON.stringify({
+            name:S.user,
+            email:S.user,
+            message:(assistType==='return'?'RETURN & REFUND REQUEST':'OTHER ISSUE')+' — ORDER #'+_cancelOrdId+': '+reason
+          }),
+        });
+      }
+    }catch(e){console.warn('Assist email:',e);}
+    closeCancelModal();
+    showPop('✉️','REQUEST RECEIVED','WE HAVE RECEIVED YOUR REQUEST FOR ORDER #'+_cancelOrdId+'. OUR TEAM WILL REVIEW IT AND GET BACK TO YOU WITHIN 24-48 HOURS.');
+  }
+}toast('ORDER #'+_cancelOrdId+' HAS BEEN CANCELLED.','ok');
   renderOrders();
-}
 function renderOrders(){
   const el=document.getElementById('ordContent');
   if(!el) return;
@@ -2184,11 +2191,13 @@ function renderOrders(){
       +'<span class="oc-status" style="color:'+statusColor+';border-color:'+statusColor+'">'+o.status+'</span>'
       +'</div>'
       +trackerHTML
-      +'<div class="oc-items">'+o.items.map(function(i){return i.name+' ('+(i.sz||i.size)+'ML) ×'+i.qty;}).join(' · ')+'</div>'
-     +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;">'
       +'<div class="oc-total">₹'+fmt(safeNum(o.tot||o.total))+'</div>'
       +'</div>'
-      +(isCancelled?'':'<div style="text-align:right;margin-top:10px;"><button onclick="cancelOrder(\''+o.id+'\')" style="background:none;border:none;color:var(--muted);font-size:0.55rem;letter-spacing:0.1em;cursor:pointer;text-decoration:underline;text-underline-offset:3px;">Need assistance with this order?</button></div>')
+      +(isCancelled?'<div style="margin-top:8px;font-size:0.58rem;color:var(--muted);letter-spacing:0.08em;">CANCELLATION REASON: '+(o.cancelReason||'N/A')+'</div>':'')
+      +'<div style="text-align:right;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">'
+      +(isCancelled?'':'<button onclick="cancelOrder(\''+o.id+'\')" style="background:none;border:none;color:var(--muted);font-size:0.55rem;letter-spacing:0.1em;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:0;">Need assistance with this order?</button>')
+      +'</div>'
       +'</div>';
   }).join('');
 }async function doForgot(e){
@@ -2474,7 +2483,10 @@ load();
   if(!canvas)return;
   var ctx=canvas.getContext('2d');
   var particles=[];
-  function resize(){canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;}
+  function resize(){
+    canvas.width=canvas.offsetWidth||canvas.parentElement.offsetWidth||window.innerWidth;
+    canvas.height=canvas.offsetHeight||canvas.parentElement.offsetHeight||400;
+  }
   resize();
   window.addEventListener('resize',resize,{passive:true});
   for(var i=0;i<55;i++){
