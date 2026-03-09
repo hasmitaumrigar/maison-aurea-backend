@@ -1600,7 +1600,7 @@ function navProfile(){
     nm.textContent=S.users[S.user].name.toUpperCase();
     it.innerHTML='<button class="pdrop-item" onclick="go(\'orders\');closePdrop()">ORDER HISTORY</button><button class="pdrop-item" onclick="go(\'wishlist\');closePdrop()">WISHLIST</button><button class="pdrop-item red" onclick="doLogout()">SIGN OUT</button>';
   }else{
-    nm.textContent='GUEST';
+    nm.textContent='';
     it.innerHTML='<button class="pdrop-item" onclick="go(\'login\');closePdrop()">SIGN IN</button><button class="pdrop-item" onclick="go(\'signup\');closePdrop()">CREATE ACCOUNT</button>';
   }
 }
@@ -1761,8 +1761,8 @@ function qadd(e,id){
 function renderCart(){
   const el=document.getElementById('cartContent');
   if(!el) return;
-  if(!S.cart.length){
-    el.innerHTML='<div class="empty"><div class="empty-icon">⊠</div><p class="empty-txt">YOUR CART IS EMPTY</p><p class="empty-sub">DISCOVER OUR FRAGRANCES.</p><button class="btn btn-gold" onclick="go(\'womens\')">SHOP NOW →</button></div>';
+  if(!S.user){
+    el.innerHTML='<div class="empty"><div class="empty-icon">👤</div><p class="empty-txt">PLEASE SIGN IN TO VIEW YOUR CART</p><button class="btn btn-gold" onclick="go(\'login\')">SIGN IN →</button></div>';
     return;
   }
   // NaN-safe totals
@@ -2457,6 +2457,32 @@ function fmt(n){
 
 /* ═══ LOAD STATE ON STARTUP ═══ */
 load();
+// Auto logout after 3 hours of inactivity
+(function(){
+  var TIMEOUT=3*60*60*1000; // 3 hours
+  var timer;
+  function resetTimer(){
+    clearTimeout(timer);
+    timer=setTimeout(function(){
+      if(S.user){
+        S.user=null;
+        S.cart=[];
+        S.wl=[];
+        localStorage.removeItem('ma_token');
+        save();
+        badges();
+        navProfile();
+        mnavAuthLbl();
+        toast('YOU HAVE BEEN LOGGED OUT DUE TO INACTIVITY.','err');
+        go('home');
+      }
+    },TIMEOUT);
+  }
+  ['click','scroll','keydown','touchstart','mousemove'].forEach(function(e){
+    window.addEventListener(e,resetTimer,{passive:true});
+  });
+  resetTimer();
+})();
 (function(){
   var bar=document.getElementById('scroll-bar');
   window.addEventListener('scroll',function(){
